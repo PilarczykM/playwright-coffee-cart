@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/PilarczykM/playwright-coffee-cart#readme",
   "devDependencies": {
+    "@biomejs/biome": "2.2.5",
     "@playwright/test": "^1.56.0",
     "@types/node": "^24.7.0"
   }
