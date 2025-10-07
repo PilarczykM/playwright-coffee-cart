@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "_ga",
+      "value": "GA1.1.713782763.1759838507",
+      "domain": ".coffee-cart.app",
+      "path": "/",
+      "expires": 1794398507.166724,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_LB75G4EJT9",
+      "value": "GS2.1.s1759838507$o1$g0$t1759838507$j60$l0$h0",
+      "domain": ".coffee-cart.app",
+      "path": "/",
+      "expires": 1794398507.171914,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}
