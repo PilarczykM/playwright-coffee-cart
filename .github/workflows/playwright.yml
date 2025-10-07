@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Verify code style with Biome
-        run: npx biome check --changed
+        run: make check
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
