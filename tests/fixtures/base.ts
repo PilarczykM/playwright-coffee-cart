@@ -9,9 +9,10 @@ type TestFixtures = {
 
 export const test = base.extend<TestFixtures>({
   homePage: async ({ page }, use) => {
-    page.goto("/");
     const navigation = new Navigation(page);
-    await use(new HomePage(page, navigation));
+    const homePage = new HomePage(page, navigation);
+    await homePage.page.goto("/");
+    await use(homePage);
   },
 });
 

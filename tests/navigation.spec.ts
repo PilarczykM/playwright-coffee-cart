@@ -12,10 +12,6 @@ const links: {
 ];
 
 test.describe("Navigation", () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.navigation.navigateTo("homeLink");
-  });
-
   for (const { key, text } of links) {
     test(`"${key}" has text "${text}"`, async ({ homePage }) => {
       await expect(homePage.navigation.getSelector(key)).toContainText(text);
