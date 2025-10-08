@@ -25,3 +25,23 @@ test.describe("Navigation", () => {
     });
   }
 });
+
+test.describe("Cart", () => {
+  test.only("should open payment modal when clicking checkout button", async ({ homePage }) => {
+    await homePage.cart.openPaymentModel();
+    await expect(homePage.page.getByText("Payment details")).toBeVisible();
+  });
+});
+
+test.describe("Product list", () => {
+  test("Verify that all coffee items are displayed with their name and price", async ({
+    homePage,
+  }) => {
+    const products = await homePage.productList.getAllProducts().all();
+    for (const product of products) {
+      const { name, price } = await homePage.productList.getProductDetails(product);
+      expect(name.length).toBeGreaterThan(0);
+      expect(price.length).toBeGreaterThan(0);
+    }
+  });
+});
