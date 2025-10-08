@@ -2,6 +2,8 @@
 import { test as base } from "@playwright/test";
 import { HomePage } from "../poms/home-page";
 import { Navigation } from "../components/navigation";
+import { Cart } from "../components/cart";
+import { ProductList } from "../components/product-list";
 
 type TestFixtures = {
   homePage: HomePage;
@@ -10,7 +12,9 @@ type TestFixtures = {
 export const test = base.extend<TestFixtures>({
   homePage: async ({ page }, use) => {
     const navigation = new Navigation(page);
-    const homePage = new HomePage(page, navigation);
+    const cart = new Cart(page);
+    const productList = new ProductList(page);
+    const homePage = new HomePage(page, navigation, productList, cart);
     await homePage.page.goto("/");
     await use(homePage);
   },
