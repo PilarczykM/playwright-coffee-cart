@@ -34,6 +34,7 @@ test.describe("Cart", () => {
 });
 
 test.describe("Product list", () => {
+  const defaultProductName = "Espresso";
   test("Verify that all coffee items are displayed with their name and price", async ({
     homePage,
   }) => {
@@ -43,5 +44,39 @@ test.describe("Product list", () => {
       expect(name.length).toBeGreaterThan(0);
       expect(price.length).toBeGreaterThan(0);
     }
+  });
+
+  test("Verify that double-clicking on a coffee title translates it to Chinese.", async ({
+    homePage,
+  }) => {
+    const product = homePage.productList.getProductByName(defaultProductName);
+    const heading = product.locator("h4");
+    await heading.dblclick();
+    await expect(heading).not.toHaveText(defaultProductName);
+  });
+
+  test("Verify that right-clicking on a coffee icon opens an 'add to cart' dialog", async ({
+    homePage,
+  }) => {
+    const product = homePage.productList.getProductByName(defaultProductName);
+    await product.click({ button: "right" });
+
+    const dialog = homePage.page.locator("dialog", {
+      hasText: `Add ${defaultProductName} to the cart?`,
+    });
+    await expect(dialog).toBeVisible();
+  });
+
+  test.only("Verify that adding a 3rd item to the cart triggers a promo coffee pop-up.", async ({
+    homePage,
+  }) => {
+    const clickCount = 3;
+    const promoDivLocator = "div.promo";
+
+    await expect(homePage.page.locator(promoDivLocator)).not.toBeVisible();
+
+    await homePage.productList.getProductByName(defaultProductName).click({ clickCount });
+
+    await expect(homePage.page.locator(promoDivLocator)).toBeVisible();
   });
 });
