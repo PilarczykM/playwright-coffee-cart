@@ -1,6 +1,9 @@
 import type { Navigation } from "./components/navigation";
 import { expect, test } from "./fixtures/base";
 
+const DEFAULT_PRODUCT_NAME = "Espresso";
+const ANOTHER_PRODUCT_NAME = "Cappuccino";
+
 const links: {
   key: keyof typeof Navigation.prototype.selectors;
   text: string;
@@ -32,11 +35,75 @@ test.describe("Cart button", () => {
     await expect(homePage.page.getByText("Payment details")).toBeVisible();
   });
 
-  // TODO: Add rest of the cart tests (add/remove items, quantity, total price, etc.)
+  test("should add item to cart when clicking on product", async ({ homePage }) => {
+    await homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME).click();
+
+    await expect(homePage.cart.getCartItem(DEFAULT_PRODUCT_NAME)).toContainText(
+      DEFAULT_PRODUCT_NAME,
+    );
+    await expect(homePage.cart.getCartItemQuantity(DEFAULT_PRODUCT_NAME)).toContainText("1");
+  });
+
+  test("should increase item quantity when clicking add button", async ({ homePage }) => {
+    const expectedQuantity = "2";
+
+    await homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME).click();
+    await homePage.cart.hoverCart();
+    await homePage.cart.getCartItemAddButton(DEFAULT_PRODUCT_NAME).click();
+
+    await expect(homePage.cart.getCartItemQuantity(DEFAULT_PRODUCT_NAME)).toContainText(
+      expectedQuantity,
+    );
+  });
+
+  test("should decrease item quantity when clicking remove button", async ({ homePage }) => {
+    const expectedQuantity = "1";
+    const clickCount = 2;
+
+    await homePage.productList
+      .getProductByName(DEFAULT_PRODUCT_NAME)
+      .click({ clickCount: clickCount });
+    await homePage.cart.hoverCart();
+    await homePage.cart.getCartItemRemoveButton(DEFAULT_PRODUCT_NAME).click();
+
+    await expect(homePage.cart.getCartItemQuantity(DEFAULT_PRODUCT_NAME)).toContainText(
+      expectedQuantity,
+    );
+  });
+
+  test("should remove item from cart when quantity is 0", async ({ homePage }) => {
+    await homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME).click();
+    await homePage.productList.getProductByName(ANOTHER_PRODUCT_NAME).click();
+    await homePage.cart.hoverCart();
+    await homePage.cart.getCartItemRemoveButton(DEFAULT_PRODUCT_NAME).click();
+
+    await expect(homePage.cart.getCartItem(DEFAULT_PRODUCT_NAME)).not.toBeVisible();
+  });
+
+  test("should update total price when adding items to cart", async ({ homePage }) => {
+    const product = homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME);
+    const { price } = await homePage.productList.getProductDetails(product);
+    await test.step("Add first item to cart and check price", async () => {
+      await product.click();
+      await expect(homePage.cart.selectors.checkoutButton).toContainText(`${price}`);
+    });
+
+    await test.step("Add second item to cart and check price", async () => {
+      await homePage.cart.hoverCart();
+      await homePage.cart.getCartItemAddButton(DEFAULT_PRODUCT_NAME).click();
+      const totalPrice = (Number(price.replace("$", "")) * 2).toFixed(2);
+
+      await expect(homePage.cart.selectors.checkoutButton).toContainText(`${totalPrice}`);
+    });
+
+    await test.step("Remove one item from cart and check price", async () => {
+      await homePage.cart.getCartItemRemoveButton(DEFAULT_PRODUCT_NAME).click();
+      await expect(homePage.cart.selectors.checkoutButton).toContainText(`${price}`);
+    });
+  });
 });
 
 test.describe("Product list", () => {
-  const defaultProductName = "Espresso";
   test("Verify that all coffee items are displayed with their name and price", async ({
     homePage,
   }) => {
@@ -51,20 +118,20 @@ test.describe("Product list", () => {
   test("Verify that double-clicking on a coffee title translates it to Chinese.", async ({
     homePage,
   }) => {
-    const product = homePage.productList.getProductByName(defaultProductName);
+    const product = homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME);
     const heading = product.locator("h4");
     await heading.dblclick();
-    await expect(heading).not.toHaveText(defaultProductName);
+    await expect(heading).not.toHaveText(DEFAULT_PRODUCT_NAME);
   });
 
   test("Verify that right-clicking on a coffee icon opens an 'add to cart' dialog", async ({
     homePage,
   }) => {
-    const product = homePage.productList.getProductByName(defaultProductName);
+    const product = homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME);
     await product.click({ button: "right" });
 
     const dialog = homePage.page.locator("dialog", {
-      hasText: `Add ${defaultProductName} to the cart?`,
+      hasText: `Add ${DEFAULT_PRODUCT_NAME} to the cart?`,
     });
     await expect(dialog).toBeVisible();
   });
@@ -77,7 +144,7 @@ test.describe("Product list", () => {
 
     await expect(homePage.page.locator(promoDivLocator)).not.toBeVisible();
 
-    await homePage.productList.getProductByName(defaultProductName).click({ clickCount });
+    await homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME).click({ clickCount });
 
     await expect(homePage.page.locator(promoDivLocator)).toBeVisible();
   });
@@ -93,7 +160,7 @@ test.describe("Product list", () => {
     });
 
     await homePage.page.goto("/?breakable=1");
-    const product = homePage.productList.getProductByName(defaultProductName);
+    const product = homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME);
     await product.click();
 
     expect(errors.length).toBeGreaterThan(0);
@@ -103,7 +170,7 @@ test.describe("Product list", () => {
   test("Verify that hovering over the `Pay` button shows a quick cart preview.", async ({
     homePage,
   }) => {
-    await homePage.productList.getProductByName(defaultProductName).click();
+    await homePage.productList.getProductByName(DEFAULT_PRODUCT_NAME).click();
     await homePage.cart.hoverCart();
 
     await expect(homePage.cart.selectors.cartItems).toHaveClass(/show/);
