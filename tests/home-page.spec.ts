@@ -27,7 +27,7 @@ test.describe("Navigation", () => {
 });
 
 test.describe("Cart", () => {
-  test.only("should open payment modal when clicking checkout button", async ({ homePage }) => {
+  test("should open payment modal when clicking checkout button", async ({ homePage }) => {
     await homePage.cart.openPaymentModel();
     await expect(homePage.page.getByText("Payment details")).toBeVisible();
   });
@@ -67,7 +67,7 @@ test.describe("Product list", () => {
     await expect(dialog).toBeVisible();
   });
 
-  test.only("Verify that adding a 3rd item to the cart triggers a promo coffee pop-up.", async ({
+  test("Verify that adding a 3rd item to the cart triggers a promo coffee pop-up.", async ({
     homePage,
   }) => {
     const clickCount = 3;
@@ -79,4 +79,63 @@ test.describe("Product list", () => {
 
     await expect(homePage.page.locator(promoDivLocator)).toBeVisible();
   });
+
+  test("Verify that an error is thrown when adding a coffee to the cart with the `?breakable=1` parameter.", async ({
+    homePage,
+  }) => {
+    const errors: string[] = [];
+    homePage.page.on("console", (msg) => {
+      if (msg.type() === "error") {
+        errors.push(msg.text());
+      }
+    });
+
+    await homePage.page.goto("/?breakable=1");
+    const product = homePage.productList.getProductByName(defaultProductName);
+    await product.click();
+
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0]).toMatch(/broken/);
+  });
+
+  test("Verify that hovering over the `Pay` button shows a quick cart preview.", async ({
+    homePage,
+  }) => {
+    await homePage.productList.getProductByName(defaultProductName).click();
+    await homePage.cart.hoverCart();
+
+    await expect(homePage.cart.selectors.cartItems).toHaveClass(/show/);
+  });
+});
+
+test.skip("@performance Verify that the page loads slower when the `?ad=1` parameter is present.", async ({
+  browser,
+  baseURL,
+}) => {
+  const minimalDeviations = 200;
+
+  const makeAbsolute = (path: string) => (baseURL ? new URL(path, baseURL).toString() : path);
+
+  const measure = async (path: string) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const url = makeAbsolute(path);
+    await page.goto(url, { waitUntil: "load" });
+
+    const duration = await page.evaluate(() => {
+      const nav = performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined;
+      if (nav) return nav.duration;
+    });
+
+    await context.close();
+    return duration as number;
+  };
+
+  const normal = await measure("/");
+  const ad = await measure("/?ad=1");
+
+  const delta = ad - normal;
+  expect(delta).toBeGreaterThan(minimalDeviations);
 });
