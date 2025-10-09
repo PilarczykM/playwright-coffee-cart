@@ -26,11 +26,13 @@ test.describe("Navigation", () => {
   }
 });
 
-test.describe("Cart", () => {
+test.describe("Cart button", () => {
   test("should open payment modal when clicking checkout button", async ({ homePage }) => {
     await homePage.cart.openPaymentModel();
     await expect(homePage.page.getByText("Payment details")).toBeVisible();
   });
+
+  // TODO: Add rest of the cart tests (add/remove items, quantity, total price, etc.)
 });
 
 test.describe("Product list", () => {
