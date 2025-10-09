@@ -18,19 +18,19 @@ export class Cart {
     await this.selectors.checkoutButton.hover();
   };
 
-  // getCartItem = (name: string) => {
-  //   return this.selectors.cartItem.filter({ hasText: name });
-  // };
+  getCartItem = (name: string) => {
+    return this.selectors.cartItems.locator(".list-item").filter({ hasText: name });
+  };
 
-  // getCartItemQuantity = (name: string) => {
-  //   return this.getCartItem(name).locator(".cart-item-quantity");
-  // };
+  getCartItemQuantity = (name: string) => {
+    return this.getCartItem(name).locator(".unit-desc");
+  };
 
-  // getCartItemAddButton = (name: string) => {
-  //   return this.getCartItem(name).getByRole("button", { name: "+" });
-  // };
+  getCartItemAddButton = (name: string) => {
+    return this.getCartItem(name).getByRole("button", { name: `Add one ${name}` });
+  };
 
-  // getCartItemRemoveButton = (name: string) => {
-  //   return this.getCartItem(name).getByRole("button", { name: "-" });
-  // };
+  getCartItemRemoveButton = (name: string) => {
+    return this.getCartItem(name).getByRole("button", { name: `Remove one ${name}` });
+  };
 }
