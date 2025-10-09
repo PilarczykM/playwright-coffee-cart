@@ -208,3 +208,42 @@ test.skip("@performance Verify that the page loads slower when the `?ad=1` param
   const delta = ad - normal;
   expect(delta).toBeGreaterThan(minimalDeviations);
 });
+
+test.describe("Mock page list", () => {
+  test("mock coffee cart products", async ({ homePage }) => {
+    const mockProducts = [
+      {
+        name: "My Recipe Coffee",
+        price: 99,
+        recipe: [
+          { name: "espresso", quantity: 30 },
+          { name: "milk foam", quantity: 15 },
+        ],
+      },
+    ];
+
+    await homePage.page.route("/list.json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockProducts),
+      });
+    });
+
+    await homePage.page.goto("/");
+    await expect(homePage.productList.getProductByName(mockProducts[0].name)).toBeVisible();
+  });
+
+  test("mock empty coffee cart products", async ({ homePage }) => {
+    await homePage.page.route("/list.json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    });
+
+    await homePage.page.goto("/");
+    await expect(homePage.productList.selectors.productList).toBeEmpty();
+  });
+});
