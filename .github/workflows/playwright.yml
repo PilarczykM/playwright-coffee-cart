@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-      shard: [1/4, 2/4, 3/4, 4/4] # Runs 4 jobs in parallel
+        shard: [1/4, 2/4, 3/4, 4/4] # Runs 4 jobs in parallel
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
